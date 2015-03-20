@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.xerces.parsers.DOMParser;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -225,7 +226,7 @@ public class PHPCodeSniffer extends AbstractPHPTool {
 					.getSessionProperty(QUALIFIED_NAME);
 			if (launcher != null) {
 				launcher.setCommandLineArgs(getCommandLineArgs(standard,
-						prefs.getTabWidth()));
+						prefs.getTabWidth(), ResourcesPlugin.getEncoding()));
 				return launcher;
 			}
 		} catch (CoreException e) {
@@ -234,7 +235,7 @@ public class PHPCodeSniffer extends AbstractPHPTool {
 
 		launcher = new PHPToolLauncher(QUALIFIED_NAME,
 				getPHPExecutable(prefs.getPhpExecutable()), getScriptFile(),
-				getCommandLineArgs(standard, prefs.getTabWidth()),
+				getCommandLineArgs(standard, prefs.getTabWidth(), ResourcesPlugin.getEncoding()),
 				getPHPINIEntries(prefs, project, standard));
 
 		launcher.setPrintOuput(prefs.isPrintOutput());
@@ -279,7 +280,7 @@ public class PHPCodeSniffer extends AbstractPHPTool {
 				"/php/tools/phpcs.php");
 	}
 
-	private String getCommandLineArgs(Standard standard, int tabWidth) {
+	private String getCommandLineArgs(Standard standard, int tabWidth, String encoding) {
 
 		String args = "--report=xml --standard="
 				+ (standard.custom ? OperatingSystem
@@ -288,6 +289,9 @@ public class PHPCodeSniffer extends AbstractPHPTool {
 
 		if (tabWidth > 0)
 			args += " --tab-width=" + tabWidth;
+
+		if (encoding != null && !encoding.isEmpty())
+			args += " --encoding=" + encoding;
 
 		return args + " " + PHPToolLauncher.COMMANDLINE_PLACEHOLDER_FILE;
 	}
